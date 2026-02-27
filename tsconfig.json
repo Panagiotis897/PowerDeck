@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "ESNext",
+        "lib": [
+            "DOM",
+            "ES6"
+        ],
+        "allowJs": true,
+        "checkJs": false,
+        "outDir": "./public/js",
+        "rootDir": "./public/js",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+        "public/js/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "public/js/**/*.js"
+    ]
+}

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stream Deck | Premium Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="glass-container">
+        <aside class="nav-rail">
+            <div class="logo">
+                <span class="logo-icon">🚀</span>
+            </div>
+            <nav>
+                <button class="nav-item active" title="Dashboard" onclick="showView('dashboard')">
+                    <span class="icon">📊</span>
+                </button>
+                <button class="nav-item" title="Layout Editor" onclick="showView('editor')">
+                    <span class="icon">🎨</span>
+                </button>
+                <button class="nav-item" title="Settings" onclick="showView('settings')">
+                    <span class="icon">⚙️</span>
+                </button>
+                <div style="flex: 1;"></div>
+                <button class="nav-item" title="Classic Dashboard" onclick="window.location.href='index.html'" style="margin-top: auto; opacity: 0.6;">
+                    <span class="icon">🏛️</span>
+                </button>
+            </nav>
+            <div class="status-indicator" id="connectionStatus">
+                <div class="dot"></div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+            <header class="top-bar">
+                <div class="header-left">
+                    <h1 id="viewTitle">Dashboard</h1>
+                    <p class="subtitle">Welcome back, Commander.</p>
+                </div>
+                <div class="header-right">
+                    <div class="live-clock" id="liveClock">00:00:00</div>
+                </div>
+            </header>
+
+            <section id="dashboardView" class="view-section active">
+                <div class="dashboard-grid">
+                    <div class="grid-container" id="buttonGrid">
+                        <!-- Buttons injected by dashboard.ts -->
+                    </div>
+                </div>
+                
+                <div class="widgets-area" id="widgetsArea">
+                    <div class="section-header">
+                        <h2>Active Widgets</h2>
+                        <button class="btn-text" onclick="showWidgetEditor()">+ Add Widget</button>
+                    </div>
+                    <div class="widgets-grid" id="widgetsContainer">
+                        <!-- Widgets injected by dashboard.ts -->
+                    </div>
+                </div>
+            </section>
+
+            <section id="editorView" class="view-section">
+                <!-- Layout Editor Content -->
+                <div class="editor-placeholder">
+                    <h2>Grid Configurator</h2>
+                    <div class="settings-card">
+                         <label>
+                            Grid Size:
+                            <select id="gridSize">
+                                <option value="3">3x3</option>
+                                <option value="4" selected>4x4</option>
+                                <option value="5">5x5</option>
+                                <option value="6">6x6</option>
+                            </select>
+                        </label>
+                        <label>
+                            Button Size:
+                            <input type="range" id="buttonSize" min="50" max="200" value="100">
+                            <span id="buttonSizeVal">100px</span>
+                        </label>
+                        <button class="btn-primary" onclick="saveSettings()">Apply Changes</button>
+                    </div>
+                    <button class="btn-outline add-btn-large" onclick="addNewButton()">+ Create New Button</button>
+                </div>
+            </section>
+
+            <section id="settingsView" class="view-section">
+                <h2>Application Settings</h2>
+                <div class="settings-list">
+                    <div class="settings-card">
+                        <h3>Profile Management</h3>
+                        <label>
+                            Active Profile:
+                            <select id="activeProfileSelect" onchange="switchProfile(this.value)">
+                                <!-- Options injected by dashboard.ts -->
+                            </select>
+                        </label>
+                        <div class="form-group" style="display: flex; gap: 10px; margin-top: 10px;">
+                            <input type="text" id="newProfileName" placeholder="New Profile Name..." style="flex: 1;">
+                            <button class="btn-primary" onclick="createNewProfile()">Create</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Configuration Portability</h3>
+                        <p style="color: var(--text-dim); margin-bottom: 15px;">Export your setup to a JSON file or import a backup.</p>
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn-outline" onclick="exportConfig()" style="flex: 1;">Export JSON</button>
+                            <button class="btn-outline" onclick="document.getElementById('importFile').click()" style="flex: 1;">Import JSON</button>
+                            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importConfig(event)">
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Preference Controls</h3>
+                        <label>
+                            Glassmorphism Intensity:
+                            <input type="range" id="glassIntensity" min="0" max="100" value="30">
+                        </label>
+                        <label>
+                            Accent Color:
+                            <input type="color" id="accentColor" value="#6366f1">
+                        </label>
+                    </div>
+                    <div class="settings-card">
+                        <h3>Data Management</h3>
+                        <p style="color: var(--text-dim); margin-bottom: 15px;">Danger Zone - This actions cannot be undone.</p>
+                        <button class="btn-primary" style="background: var(--danger)" onclick="resetAllData()">Reset All Data</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Button Editor Modal -->
+    <div id="buttonEditor" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2 id="btnEditorTitle">New Button</h2>
+                <button class="close-btn" onclick="closeButtonEditor()">&times;</button>
+            </div>
+            <form id="buttonForm">
+                <input type="hidden" id="editBtnIndex" value="-1">
+                <div class="form-group">
+                    <label>Icon (Emoji)</label>
+                    <input type="text" id="btnIcon" placeholder="🎵" required>
+                </div>
+                <div class="form-group">
+                    <label>Label</label>
+                    <input type="text" id="btnLabel" placeholder="Play Music" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="btnType" onchange="toggleBtnFields()">
+                        <option value="keyboard">Keyboard Shortcut</option>
+                        <option value="system">System Command / URL</option>
+                    </select>
+                </div>
+                
+                <div id="keyboardFields">
+                    <div class="form-group">
+                        <label>Key</label>
+                        <input type="text" id="btnKey" placeholder="space">
+                    </div>
+                    <div class="form-group">
+                        <label>Shortcut Hint (displayed)</label>
+                        <input type="text" id="btnShortcut" placeholder="SPC">
+                    </div>
+                </div>
+
+                <div id="systemFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Action</label>
+                        <select id="btnAction">
+                            <option value="command">Command Line</option>
+                            <option value="open">Open URL/File</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Command/URL</label>
+                        <input type="text" id="btnCommand" placeholder="https://google.com">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Save Button</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Widget Editor Modal -->
+    <div id="widgetEditor" class="modal-overlay">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>New Widget</h2>
+                <button class="close-btn" onclick="closeWidgetEditor()">&times;</button>
+            </div>
+            <form id="widgetForm">
+                <div class="form-group">
+                    <label>Widget Name</label>
+                    <input type="text" id="widgetName" placeholder="CPU Monitor..." required>
+                </div>
+                <div class="form-group">
+                    <label>HTML</label>
+                    <textarea id="widgetHtml" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>CSS</label>
+                    <textarea id="widgetCss" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>JS</label>
+                    <textarea id="widgetJs" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn-primary">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/websocket.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>
