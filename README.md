@@ -5,6 +5,9 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
 ## ✨ Features
 
 - **Premium Interface**: Stunning glassmorphism design with fluid animations and a responsive layout.
+- **Drag & Drop Layouts**: Easily rearrange buttons and widgets with intuitive drag-and-drop functionality.
+- **Board Mode**: A distraction-free, full-screen experience that hides menus and maximizes your grid (inspired by SIM Dashboard).
+- **Fit to Screen**: Toggle between fixed-size buttons or a fluid grid that automatically fills your entire screen.
 - **Multiple Profiles**: Create, save, and switch between different dashboard layouts (e.g., Gaming, Work, Streaming).
 - **Custom Widgets**: Import or create your own widgets using HTML, CSS, and JavaScript.
 - **Macro Control**: Execute keyboard shortcuts and system commands directly from the dashboard.
@@ -20,8 +23,8 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
 ### Setup
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/stream-deck-web.git
-   cd stream-deck-web
+   git clone https://github.com/Panagiotis897/PowerDeck.git
+   cd PowerDeck
    ```
 
 2. **Install dependencies**:
@@ -30,13 +33,13 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
    ```
 
 3. **Compile TypeScript**:
-   This project uses TypeScript for the premium dashboard logic.
+   This project uses TypeScript for the dashboard logic.
    ```bash
    npx tsc
    ```
 
 4. **Generate Dashboard**:
-   Initialize the premium dashboard files:
+   Initialize the premium dashboard files (HTML, CSS, TS):
    ```bash
    npm run generate-dash
    ```
@@ -52,15 +55,22 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
    Open your browser and navigate to:
    `http://localhost:3000`
 
-3. **Go Premium**:
-   Click the **"Premium Dashboard"** button on the classic sidebar to experience the new interface.
+## 🏗️ Architecture
 
-## 🎨 Customizing
+The app follows a modern web-to-system architecture:
 
-- **Adding Buttons**: Click the "Layout Editor" (🎨) in the sidebar, then click "+ Create New Button".
-- **Creating Widgets**: Go to the Dashboard view and click "+ Add Widget" to write your own HTML/CSS/JS components.
-- **Profiles**: Switch profiles or create new ones in the Settings (⚙️) panel.
-- **Backup**: Use the "Export JSON" button in Settings to save your layout.
+1.  **Frontend**: A glassmorphic dashboard built with HTML/CSS and TypeScript. UI state is persisted in `localStorage`.
+2.  **Generator**: A Node.js script (`scripts/generate-dashboard.js`) that handles the generation of static assets, allowing for easy updates and modular component injection.
+3.  **Backend**: An Express.js server (`server.js`) that serves the static files and maintains a WebSocket connection with the clients.
+4.  **System Bridge**: The backend translates WebSocket messages into system-level commands (keyboard macros, app launches) using platform-specific scripts.
+
+## 💻 Cross-Platform Support
+
+The system bridge is designed to work seamlessly across major operating systems:
+
+-   **Windows**: Uses PowerShell with `System.Windows.Forms` for precision key sending.
+-   **macOS**: Leverages AppleScript (`osascript`) for native UI interaction.
+-   **Linux**: Utilizes `xdotool` for keyboard emulation.
 
 ## 🤝 Contributing
 

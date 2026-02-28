@@ -457,3 +457,58 @@ select option { background: #1e1e2d; color: var(--text-main); padding: 10px; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
+
+/* Drag and Drop Styles */
+.stream-button.dragging, .widget-card.dragging {
+    opacity: 0.5;
+    border: 2px dashed var(--accent-color);
+    transform: scale(0.95);
+    cursor: grabbing;
+}
+
+.stream-button[draggable="true"], .widget-card[draggable="true"] {
+    cursor: grab;
+}
+
+.stream-button.fluid {
+    aspect-ratio: auto;
+    height: 100%;
+    width: 100%;
+    min-height: 80px;
+}
+
+/* Board Mode */
+body.board-mode .nav-rail,
+body.board-mode .top-bar,
+body.board-mode .widgets-area,
+body.board-mode #editorView,
+body.board-mode #settingsView {
+    display: none !important;
+}
+
+body.board-mode .glass-container {
+    padding: 0;
+    height: 100vh;
+}
+
+body.board-mode .content-area {
+    gap: 0;
+    padding: 0;
+}
+
+body.board-mode .dashboard-grid {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    height: 100vh;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.board-mode .grid-container {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+}

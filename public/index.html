@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stream Deck</title>
+    <title>PowerDeck</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -38,6 +38,8 @@
                     <p class="subtitle">Welcome back, Commander.</p>
                 </div>
                 <div class="header-right">
+                    <button class="btn-outline" id="toggleFitBtn" onclick="toggleFit()" style="margin-right: 15px; font-size: 14px; padding: 6px 12px;">Fit: Off</button>
+                    <button class="btn-outline" id="toggleBoardModeBtn" onclick="toggleBoardMode()" style="margin-right: 15px; font-size: 14px; padding: 6px 12px;">📱 Board Mode</button>
                     <div class="live-clock" id="liveClock">00:00:00</div>
                 </div>
             </header>
@@ -131,6 +133,10 @@
                 </div>
             </section>
         </main>
+    </div>
+
+    <div id="boardModeOverlay" style="display: none; position: fixed; top: 10px; right: 10px; z-index: 10000;">
+        <button class="btn-primary" onclick="toggleBoardMode()" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);">Exit Board Mode (ESC)</button>
     </div>
 
     <!-- Button Editor Modal -->
