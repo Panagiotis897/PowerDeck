@@ -131,23 +131,7 @@ function handleKeyboardCommand(data) {
                     return;
                 }
 
-                // Try node-key-sender if available (faster and more robust if Java exists)
-                if (typeof keySender !== 'undefined' && action === 'press') {
-                    try {
-                        const modifierMap = { 'ctrl': 'control', 'alt': 'alt', 'shift': 'shift' };
-                        const mods = modifiers.map(m => modifierMap[m] || m);
-                        console.log(`Attempting node-key-sender: ${key}, mods: ${mods}`);
-                        // Add a small delay for node-key-sender too
-                        setTimeout(() => {
-                            keySender.sendKey(key.toLowerCase(), mods);
-                        }, 100);
-                        return;
-                    } catch (e) {
-                        console.log('node-key-sender failed, falling back to PowerShell:', e.message);
-                    }
-                }
-
-                // Fallback to PowerShell
+                // Use PowerShell
                 const psCommand = `powershell -command "Start-Sleep -m 100; $wshell = New-Object -ComObject WScript.Shell; $wshell.SendKeys('${script}${mappedKey}')"`;
                 exec(psCommand);
                 break;
