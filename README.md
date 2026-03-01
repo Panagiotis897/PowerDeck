@@ -8,9 +8,10 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
 - **Board Mode**: A distraction-free, full-screen experience that hides menus and maximizes your grid (inspired by SIM Dashboard).
 - **Fit to Screen**: Toggle between fixed-size buttons or a fluid grid that automatically fills your entire screen.
 - **Multiple Profiles**: Create, save, and switch between different dashboard layouts (e.g., Gaming, Work, Streaming).
-- **Custom Widgets**: Import or create your own widgets using HTML, CSS, and JavaScript.
-- **Macro Control**: Execute keyboard shortcuts and system commands directly from the dashboard.
-- **High-Speed Windows Support**: Uses a custom-built native C# bridge for near-instant keyboard shortcuts.
+- **Text Macros & Snippets**: Insert complex text blocks or code snippets instantly.
+- **Selection Wrapping**: Use the `${selection}` placeholder in macros to wrap selected text with tags or styles.
+- **High-Speed Windows Support**: Uses a custom-built native C# bridge for near-instant keyboard shortcuts and macros.
+- **Macro Control**: Execute keyboard shortcuts, modifiers (Ctrl, Alt, Shift), and system commands.
 - **Dynamic Configuration**: Adjust grid size, button size, accent colors, and transparency in real-time.
 - **Persistence**: All settings, buttons, and profiles are saved locally in your browser.
 - **Import/Export**: Easily backup or share your entire configuration as a JSON file.
@@ -33,7 +34,7 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
    ```
 
 3. **Compile KeyRobot (Windows Only)**:
-   This project uses a custom C# utility for instant keyboard shortcuts on Windows. Compile it using the built-in .NET compiler:
+   This project uses a custom C# utility for instant keyboard shortcuts and text macros on Windows. Compile it using the built-in .NET compiler:
    ```powershell
    C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /out:scripts\KeyRobot.exe scripts\KeyRobot.cs
    ```
@@ -55,6 +56,22 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
    Open your browser and navigate to:
    `http://localhost:3000`
 
+## ⌨️ Using Macros & Snippets
+
+PowerDeck supports powerful text macros for developers and power users.
+
+### Text Macros
+Create a button with type **"Text Macro"** to type sequences of characters.
+- **Simple Snippet**: Just enter the text you want to type (e.g., `console.log();`).
+- **Selection Wrapping**: Use `${selection}` to wrap currently highlighted text.
+  - Example: `<div>${selection}</div>` will wrap your highlighted text in div tags.
+  - Example: `<a href="">${selection}</a>` will wrap selection in an anchor tag.
+
+### Keyboard Shortcuts
+Create a button with type **"Keyboard Shortcut"** to trigger system keybinds.
+- Supports modifiers: **Ctrl, Alt, and Shift**.
+- Works with special keys like `F1-F12`, `Enter`, `Space`, `Esc`, and arrow keys.
+
 ## 🏗️ Architecture
 
 The app follows a modern web-to-system architecture:
@@ -68,7 +85,7 @@ The app follows a modern web-to-system architecture:
 
 The system bridge is designed to work seamlessly across major operating systems:
 
--   **Windows**: Uses a custom native C# utility (`scripts/KeyRobot.exe`) for ultra-fast, reliable key sending.
+-   **Windows**: Uses a custom native C# utility (`scripts/KeyRobot.exe`) for ultra-fast, reliable key sending and text macros.
 -   **macOS**: Leverages AppleScript (`osascript`) for native UI interaction.
 -   **Linux**: Utilizes `xdotool` for keyboard emulation.
 
