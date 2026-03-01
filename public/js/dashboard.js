@@ -259,6 +259,9 @@ class Dashboard {
                 document.getElementById('modAlt').checked = (button.modifiers || []).includes('alt');
                 document.getElementById('modShift').checked = (button.modifiers || []).includes('shift');
             }
+            else if (button.type === 'text') {
+                document.getElementById('btnText').value = button.text || '';
+            }
             else if (button.type === 'system') {
                 document.getElementById('btnAction').value = button.action || 'command';
                 document.getElementById('btnCommand').value = button.command || '';
@@ -286,6 +289,10 @@ class Dashboard {
                 button.modifiers.push('alt');
             if (document.getElementById('modShift').checked)
                 button.modifiers.push('shift');
+        }
+        else if (button.type === 'text') {
+            button.action = 'type';
+            button.text = document.getElementById('btnText').value;
         }
         else {
             button.action = document.getElementById('btnAction').value;
@@ -478,9 +485,11 @@ window.importConfig = (e) => window.dashboardInstance.importConfig(e);
 window.toggleBtnFields = () => {
     const type = document.getElementById('btnType').value;
     const kb = document.getElementById('keyboardFields');
+    const txt = document.getElementById('textFields');
     const sys = document.getElementById('systemFields');
-    if (kb && sys) {
+    if (kb && txt && sys) {
         kb.style.display = type === 'keyboard' ? 'block' : 'none';
+        txt.style.display = type === 'text' ? 'block' : 'none';
         sys.style.display = type === 'system' ? 'block' : 'none';
     }
 };

@@ -154,6 +154,7 @@
                     <label>Type</label>
                     <select id="btnType" onchange="toggleBtnFields()">
                         <option value="keyboard">Keyboard Shortcut</option>
+                        <option value="text">Text Macro</option>
                         <option value="system">System Command / URL</option>
                     </select>
                 </div>
@@ -171,6 +172,16 @@
                             <label style="justify-content: flex-start; gap: 5px;"><input type="checkbox" id="modShift"> Shift</label>
                         </div>
                     </div>
+                </div>
+
+                <div id="textFields" style="display: none;">
+                    <div class="form-group">
+                        <label>Text to Type</label>
+                        <textarea id="btnText" placeholder="<div></div>" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div id="hintField">
                     <div class="form-group">
                         <label>Shortcut Hint (displayed)</label>
                         <input type="text" id="btnShortcut" placeholder="F1">

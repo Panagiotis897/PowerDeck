@@ -301,10 +301,18 @@ class Dashboard {
             
             if (button.type === 'keyboard') {
                 (document.getElementById('btnKey') as HTMLInputElement).value = button.key || '';
-                (document.getElementById('btnShortcut') as HTMLInputElement).value = button.shortcut || '';
+                (document.getElementById('modCtrl') as HTMLInputElement).checked = (button.modifiers || []).includes('ctrl');
+                (document.getElementById('modAlt') as HTMLInputElement).checked = (button.modifiers || []).includes('alt');
+                (document.getElementById('modShift') as HTMLInputElement).checked = (button.modifiers || []).includes('shift');
+            } else if (button.type === 'text') {
+                (document.getElementById('btnText') as HTMLTextAreaElement).value = button.text || '';
             } else if (button.type === 'system') {
                 (document.getElementById('btnAction') as HTMLSelectElement).value = button.action || 'command';
                 (document.getElementById('btnCommand') as HTMLInputElement).value = button.command || '';
+            }
+
+            if (button.type === 'keyboard' || button.type === 'text') {
+                (document.getElementById('btnShortcut') as HTMLInputElement).value = button.shortcut || '';
             }
 
             modal.style.display = 'flex';
@@ -325,10 +333,20 @@ class Dashboard {
         if (button.type === 'keyboard') {
             button.action = 'press';
             button.key = (document.getElementById('btnKey') as HTMLInputElement).value;
-            button.shortcut = (document.getElementById('btnShortcut') as HTMLInputElement).value;
+            button.modifiers = [];
+            if ((document.getElementById('modCtrl') as HTMLInputElement).checked) button.modifiers.push('ctrl');
+            if ((document.getElementById('modAlt') as HTMLInputElement).checked) button.modifiers.push('alt');
+            if ((document.getElementById('modShift') as HTMLInputElement).checked) button.modifiers.push('shift');
+        } else if (button.type === 'text') {
+            button.action = 'type';
+            button.text = (document.getElementById('btnText') as HTMLTextAreaElement).value;
         } else {
             button.action = (document.getElementById('btnAction') as HTMLSelectElement).value;
             button.command = (document.getElementById('btnCommand') as HTMLInputElement).value;
+        }
+
+        if (button.type === 'keyboard' || button.type === 'text') {
+            button.shortcut = (document.getElementById('btnShortcut') as HTMLInputElement).value;
         }
 
         if (index === -1) {
@@ -524,10 +542,15 @@ class Dashboard {
 (window as any).toggleBtnFields = () => {
     const type = (document.getElementById('btnType') as HTMLSelectElement).value;
     const kb = document.getElementById('keyboardFields');
+    const txt = document.getElementById('textFields');
     const sys = document.getElementById('systemFields');
-    if (kb && sys) {
+    const hint = document.getElementById('hintField');
+    if (kb && txt && sys && hint) {
         kb.style.display = type === 'keyboard' ? 'block' : 'none';
+        txt.style.display = type === 'text' ? 'block' : 'none';
         sys.style.display = type === 'system' ? 'block' : 'none';
+        // Always show hint for keyboard and text types
+        hint.style.display = (type === 'keyboard' || type === 'text') ? 'block' : 'none';
     }
 };
 

@@ -5,34 +5,53 @@ using System.Threading;
 
 class KeyRobot {
     [DllImport("user32.dll")]
-    static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
-
-    [DllImport("user32.dll")]
     static extern IntPtr GetForegroundWindow();
 
-    const int KEYEVENTF_EXTENDEDKEY = 0x0001;
-    const int KEYEVENTF_KEYUP = 0x0002;
-
+    [STAThread]
     static void Main(string[] args) {
         if (args.Length == 0) return;
 
-        string command = args[0];
-        Console.WriteLine("Target Key: " + command);
-
-        // 1. Give the user time to switch windows if needed (300ms)
+        string text = args[0];
+        
+        // 1. Give the user time to switch focus (300ms)
         Thread.Sleep(300);
 
-        // 2. Check which window is currently active
-        IntPtr activeWindow = GetForegroundWindow();
-        Console.WriteLine("Active Window Handle: " + activeWindow);
-
         try {
-            // Use SendKeys for the macro
-            // We use SendWait to block until the key is processed
-            SendKeys.SendWait(command);
-            Console.WriteLine("SendWait complete.");
+            if (text.Contains("${selection}")) {
+                // HANDLE SELECTION WRAPPING
+                
+                // Clear clipboard first to avoid old data
+                Clipboard.Clear();
+                
+                // Trigger Copy (Ctrl+C)
+                SendKeys.SendWait("^c");
+                Thread.Sleep(100); // Wait for OS to process copy
+
+                // Get copied text
+                string selectedText = "";
+                if (Clipboard.ContainsText()) {
+                    selectedText = Clipboard.GetText();
+                }
+
+                // Replace placeholder
+                string finalText = text.Replace("${selection}", selectedText);
+                
+                // Type the final text
+                // We use Clipboard again for pasting to be faster and support complex chars
+                Clipboard.SetText(finalText);
+                SendKeys.SendWait("^v");
+            } else {
+                // STANDARD TYPING
+                // For long text, using Clipboard + Ctrl+V is much more reliable than SendKeys
+                if (text.Length > 10) {
+                    Clipboard.SetText(text);
+                    SendKeys.SendWait("^v");
+                } else {
+                    SendKeys.SendWait(text);
+                }
+            }
         } catch (Exception e) {
-            Console.WriteLine("SendWait Error: " + e.Message);
+            Console.WriteLine("Error: " + e.Message);
         }
     }
 }

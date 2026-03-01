@@ -61,6 +61,7 @@ function handleCommand(data) {
     
     switch (data.type) {
         case 'keyboard':
+        case 'text':
             handleKeyboardCommand(data);
             break;
         case 'system':
@@ -108,10 +109,11 @@ function handleKeyboardCommand(data) {
         if (modifiers.includes('alt')) script += '%';
         if (modifiers.includes('shift')) script += '+';
         
-        const mappedKey = keyMap[key.toLowerCase()] || key;
-        
         switch (action) {
             case 'press':
+                if (!key) return;
+                const mappedKey = keyMap[key.toLowerCase()] || key;
+
                 // Try our custom KeyRobot first (it's very fast and native)
                 if (fs.existsSync(KEY_ROBOT_PATH)) {
                     let finalKey = mappedKey;
@@ -138,9 +140,10 @@ function handleKeyboardCommand(data) {
             case 'type':
                 // Type command
                 if (fs.existsSync(KEY_ROBOT_PATH)) {
-                    // Send text with special characters escaped
-                    const escapedText = data.text.replace(/[\+\^\%\~\(\)\{\}\[\]]/g, '{$&}');
-                    exec(`scripts\\KeyRobot.exe "${escapedText}"`, (error, stdout, stderr) => {
+                    // For text macros, we don't escape special chars like < > because we want them typed literally
+                    // We only escape SendKeys specific modifiers if we were using SendKeys, 
+                    // but our new Robot uses Clipboard for long text which is safer.
+                    exec(`scripts\\KeyRobot.exe "${data.text.replace(/"/g, '\\"')}"`, (error, stdout, stderr) => {
                         if (error) console.error('KeyRobot Error (type):', error);
                     });
                     return;
@@ -149,6 +152,7 @@ function handleKeyboardCommand(data) {
         }
     } else if (platform === 'darwin') {
         // macOS
+        if (!key) return;
         let script = 'osascript -e \'tell application "System Events" to ';
         if (modifiers.length > 0) {
             script += `key code ${getMacKeyCode(key)} using {${modifiers.join(', ')}}`;
@@ -162,6 +166,7 @@ function handleKeyboardCommand(data) {
         });
     } else {
         // Linux
+        if (!key) return;
         let command = 'xdotool ';
         if (modifiers.length > 0) {
             command += `key ${modifiers.join('+')}+${key}`;
