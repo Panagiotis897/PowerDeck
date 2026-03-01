@@ -4,6 +4,7 @@ const WebSocket = require('ws');
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -26,7 +27,9 @@ wss.on('connection', (ws) => {
 
     ws.on('message', (message) => {
         try {
-            const data = JSON.parse(message);
+            // Log raw message for debugging
+            console.log('Raw message received:', message.toString());
+            const data = JSON.parse(message.toString());
             handleCommand(data);
             
             // Broadcast to all clients except sender
@@ -49,6 +52,9 @@ wss.on('connection', (ws) => {
     });
 });
 
+// Path to our custom high-speed robot
+const KEY_ROBOT_PATH = path.join(__dirname, 'scripts', 'KeyRobot.exe');
+
 // Handle different types of commands
 function handleCommand(data) {
     console.log('Received command:', data);
@@ -69,29 +75,92 @@ function handleCommand(data) {
 }
 
 function handleKeyboardCommand(data) {
-    const { action, key, modifiers = [] } = data;
+    const { action = 'press', key, modifiers = [] } = data;
+    console.log(`Processing keyboard action: ${action}, key: ${key}, modifiers: ${modifiers}`);
     
     // Platform-specific keyboard commands
     if (platform === 'win32') {
         // Windows
+        
+        // Map common keys to the format KeyRobot expects (SendKeys)
+        const keyMap = {
+            'space': ' ',
+            'enter': '{ENTER}',
+            'tab': '{TAB}',
+            'esc': '{ESC}',
+            'escape': '{ESC}',
+            'up': '{UP}',
+            'down': '{DOWN}',
+            'left': '{LEFT}',
+            'right': '{RIGHT}',
+            'backspace': '{BACKSPACE}',
+            'delete': '{DELETE}',
+            'home': '{HOME}',
+            'end': '{END}',
+            'pgup': '{PGUP}',
+            'pgdn': '{PGDN}',
+            'f1': '{F1}', 'f2': '{F2}', 'f3': '{F3}', 'f4': '{F4}', 'f5': '{F5}', 'f6': '{F6}',
+            'f7': '{F7}', 'f8': '{F8}', 'f9': '{F9}', 'f10': '{F10}', 'f11': '{F11}', 'f12': '{F12}'
+        };
+
         let script = '';
         if (modifiers.includes('ctrl')) script += '^';
         if (modifiers.includes('alt')) script += '%';
         if (modifiers.includes('shift')) script += '+';
         
+        const mappedKey = keyMap[key.toLowerCase()] || key;
+        
         switch (action) {
             case 'press':
-                // Use PowerShell to send keys
-                const psCommand = `powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${script}${key}')"`;
-                exec(psCommand, (error) => {
-                    if (error) console.error('Error sending keys:', error);
-                });
+                // Try our custom KeyRobot first (it's very fast and native)
+                if (fs.existsSync(KEY_ROBOT_PATH)) {
+                    let finalKey = mappedKey;
+                    // Escape special characters if not already mapped
+                    if (!keyMap[key.toLowerCase()] && ['+', '^', '%', '~', '(', ')', '{', '}'].includes(finalKey)) {
+                        finalKey = `{${finalKey}}`;
+                    }
+                    
+                    const fullCommand = `${script}${finalKey}`;
+                    console.log(`Using KeyRobot: ${fullCommand}`);
+                    // Use double quotes for the entire command to handle paths and arguments correctly
+                    exec(`scripts\\KeyRobot.exe "${fullCommand}"`, (error, stdout, stderr) => {
+                        if (error) console.error('KeyRobot Error:', error);
+                        if (stdout) console.log('KeyRobot Output:\n', stdout);
+                        if (stderr) console.error('KeyRobot Stderr:\n', stderr);
+                    });
+                    return;
+                }
+
+                // Try node-key-sender if available (faster and more robust if Java exists)
+                if (typeof keySender !== 'undefined' && action === 'press') {
+                    try {
+                        const modifierMap = { 'ctrl': 'control', 'alt': 'alt', 'shift': 'shift' };
+                        const mods = modifiers.map(m => modifierMap[m] || m);
+                        console.log(`Attempting node-key-sender: ${key}, mods: ${mods}`);
+                        // Add a small delay for node-key-sender too
+                        setTimeout(() => {
+                            keySender.sendKey(key.toLowerCase(), mods);
+                        }, 100);
+                        return;
+                    } catch (e) {
+                        console.log('node-key-sender failed, falling back to PowerShell:', e.message);
+                    }
+                }
+
+                // Fallback to PowerShell
+                const psCommand = `powershell -command "Start-Sleep -m 100; $wshell = New-Object -ComObject WScript.Shell; $wshell.SendKeys('${script}${mappedKey}')"`;
+                exec(psCommand);
                 break;
             case 'type':
-                const typeCommand = `powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait('${data.text}')"`;
-                exec(typeCommand, (error) => {
-                    if (error) console.error('Error typing text:', error);
-                });
+                // Type command
+                if (fs.existsSync(KEY_ROBOT_PATH)) {
+                    // Send text with special characters escaped
+                    const escapedText = data.text.replace(/[\+\^\%\~\(\)\{\}\[\]]/g, '{$&}');
+                    exec(`scripts\\KeyRobot.exe "${escapedText}"`, (error, stdout, stderr) => {
+                        if (error) console.error('KeyRobot Error (type):', error);
+                    });
+                    return;
+                }
                 break;
         }
     } else if (platform === 'darwin') {

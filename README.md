@@ -1,5 +1,4 @@
-# 🚀 Premium Stream Deck Web App
-
+# 🚀 PowerDeck
 A beautiful, functional, and highly customizable Stream Deck web application. Control your computer, execute macros, and monitor your system through a high-end glassmorphism-styled dashboard.
 
 ## ✨ Features
@@ -11,6 +10,7 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
 - **Multiple Profiles**: Create, save, and switch between different dashboard layouts (e.g., Gaming, Work, Streaming).
 - **Custom Widgets**: Import or create your own widgets using HTML, CSS, and JavaScript.
 - **Macro Control**: Execute keyboard shortcuts and system commands directly from the dashboard.
+- **High-Speed Windows Support**: Uses a custom-built native C# bridge for near-instant keyboard shortcuts.
 - **Dynamic Configuration**: Adjust grid size, button size, accent colors, and transparency in real-time.
 - **Persistence**: All settings, buttons, and profiles are saved locally in your browser.
 - **Import/Export**: Easily backup or share your entire configuration as a JSON file.
@@ -32,10 +32,10 @@ A beautiful, functional, and highly customizable Stream Deck web application. Co
    npm install
    ```
 
-3. **Compile TypeScript**:
-   This project uses TypeScript for the dashboard logic.
-   ```bash
-   npx tsc
+3. **Compile KeyRobot (Windows Only)**:
+   This project uses a custom C# utility for instant keyboard shortcuts on Windows. Compile it using the built-in .NET compiler:
+   ```powershell
+   C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe /out:scripts\KeyRobot.exe scripts\KeyRobot.cs
    ```
 
 4. **Generate Dashboard**:
@@ -68,7 +68,7 @@ The app follows a modern web-to-system architecture:
 
 The system bridge is designed to work seamlessly across major operating systems:
 
--   **Windows**: Uses PowerShell with `System.Windows.Forms` for precision key sending.
+-   **Windows**: Uses a custom native C# utility (`scripts/KeyRobot.exe`) for ultra-fast, reliable key sending.
 -   **macOS**: Leverages AppleScript (`osascript`) for native UI interaction.
 -   **Linux**: Utilizes `xdotool` for keyboard emulation.
 

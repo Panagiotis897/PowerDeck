@@ -164,11 +164,19 @@ const DASHBOARD_HTML = `<!DOCTYPE html>
                 <div id="keyboardFields">
                     <div class="form-group">
                         <label>Key</label>
-                        <input type="text" id="btnKey" placeholder="space">
+                        <input type="text" id="btnKey" placeholder="f1">
+                    </div>
+                    <div class="form-group">
+                        <label>Modifiers</label>
+                        <div style="display: flex; gap: 10px; color: var(--text-dim);">
+                            <label style="justify-content: flex-start; gap: 5px;"><input type="checkbox" id="modCtrl"> Ctrl</label>
+                            <label style="justify-content: flex-start; gap: 5px;"><input type="checkbox" id="modAlt"> Alt</label>
+                            <label style="justify-content: flex-start; gap: 5px;"><input type="checkbox" id="modShift"> Shift</label>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Shortcut Hint (displayed)</label>
-                        <input type="text" id="btnShortcut" placeholder="SPC">
+                        <input type="text" id="btnShortcut" placeholder="F1">
                     </div>
                 </div>
 
@@ -671,6 +679,10 @@ select option { background: #1e1e2d; color: var(--text-main); padding: 10px; }
 
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-dim); }
+.form-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 5px;
+}
 .form-group input, .form-group textarea {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
@@ -760,8 +772,8 @@ class Dashboard {
         const s = localStorage.getItem('streamDeckSettings');
         
         this.buttons = b ? JSON.parse(b) : [
-            { icon: '🎵', label: 'Play/Pause', type: 'keyboard', key: 'space', modifiers: [], shortcut: 'SPC' },
-            { icon: '⏭️', label: 'Next Track', type: 'keyboard', key: 'right', modifiers: ['ctrl', 'alt'], shortcut: 'CTR+ALT+R' },
+            { icon: '🎵', label: 'Play/Pause', type: 'keyboard', action: 'press', key: 'space', modifiers: [], shortcut: 'SPC' },
+            { icon: '⏭️', label: 'Next Track', type: 'keyboard', action: 'press', key: 'right', modifiers: ['ctrl', 'alt'], shortcut: 'CTR+ALT+R' },
             { icon: '🌐', label: 'Browser', type: 'system', action: 'open', command: 'https://www.google.com' },
             { icon: '🔒', label: 'Lock PC', type: 'system', action: 'command', command: 'rundll32.exe user32.dll,LockWorkStation' }
         ];
@@ -1011,6 +1023,7 @@ class Dashboard {
         };
 
         if (button.type === 'keyboard') {
+            button.action = 'press';
             button.key = (document.getElementById('btnKey') as HTMLInputElement).value;
             button.shortcut = (document.getElementById('btnShortcut') as HTMLInputElement).value;
         } else {
@@ -1243,6 +1256,7 @@ const jsPath = path.join(publicPath, 'js');
 });
 
 fs.writeFileSync(path.join(publicPath, 'index.html'), DASHBOARD_HTML);
+fs.writeFileSync(path.join(publicPath, 'dashboard.html'), DASHBOARD_HTML);
 fs.writeFileSync(path.join(cssPath, 'dashboard.css'), DASHBOARD_CSS);
 fs.writeFileSync(path.join(jsPath, 'dashboard.ts'), DASHBOARD_TS);
 

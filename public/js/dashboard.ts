@@ -21,17 +21,14 @@ interface Widget {
 class Dashboard {
     private buttons: Button[] = [];
     private widgets: Widget[] = [];
-    private settings: { gridSize: number; buttonSize: number; accentColor: string; glassIntensity: number; fitToScreen: boolean } = {
+    private settings: { gridSize: number; buttonSize: number; accentColor: string; glassIntensity: number } = {
         gridSize: 4,
         buttonSize: 100,
         accentColor: '#6366f1',
-        glassIntensity: 30,
-        fitToScreen: false
+        glassIntensity: 30
     };
     private activeProfile: string = 'Default';
     private profiles: { [name: string]: { buttons: Button[], widgets: Widget[], settings: any } } = {};
-    private draggedButtonIndex: number | null = null;
-    private draggedWidgetIndex: number | null = null;
 
     constructor() {
         this.loadProfiles();
@@ -75,8 +72,8 @@ class Dashboard {
         const s = localStorage.getItem('streamDeckSettings');
         
         this.buttons = b ? JSON.parse(b) : [
-            { icon: '🎵', label: 'Play/Pause', type: 'keyboard', key: 'space', modifiers: [], shortcut: 'SPC' },
-            { icon: '⏭️', label: 'Next Track', type: 'keyboard', key: 'right', modifiers: ['ctrl', 'alt'], shortcut: 'CTR+ALT+R' },
+            { icon: '🎵', label: 'Play/Pause', type: 'keyboard', action: 'press', key: 'space', modifiers: [], shortcut: 'SPC' },
+            { icon: '⏭️', label: 'Next Track', type: 'keyboard', action: 'press', key: 'right', modifiers: ['ctrl', 'alt'], shortcut: 'CTR+ALT+R' },
             { icon: '🌐', label: 'Browser', type: 'system', action: 'open', command: 'https://www.google.com' },
             { icon: '🔒', label: 'Lock PC', type: 'system', action: 'command', command: 'rundll32.exe user32.dll,LockWorkStation' }
         ];
@@ -135,28 +132,14 @@ class Dashboard {
         const grid = document.getElementById('buttonGrid');
         if (!grid) return;
 
-        if (this.settings.fitToScreen) {
-            grid.style.gridTemplateColumns = `repeat(${this.settings.gridSize}, 1fr)`;
-            grid.style.gridAutoRows = '1fr';
-            grid.style.width = '100%';
-            grid.style.height = '100%';
-            // When fitting to screen, we might want buttons to stretch
-        } else {
-            grid.style.gridTemplateColumns = `repeat(${this.settings.gridSize}, ${this.settings.buttonSize}px)`;
-            grid.style.gridAutoRows = `${this.settings.buttonSize}px`;
-            grid.style.width = 'auto';
-            grid.style.height = 'auto';
-        }
+        grid.style.gridTemplateColumns = `repeat(${this.settings.gridSize}, ${this.settings.buttonSize}px)`;
+        grid.style.gridAutoRows = `${this.settings.buttonSize}px`;
 
         grid.innerHTML = '';
 
         this.buttons.forEach((button, index) => {
             const buttonEl = document.createElement('div');
             buttonEl.className = 'stream-button';
-            if (this.settings.fitToScreen) {
-                buttonEl.classList.add('fluid');
-            }
-            buttonEl.draggable = true;
             buttonEl.innerHTML = `
                 <button class="delete-btn" onclick="event.stopPropagation(); window.dashboardInstance.removeButton(${index})">&times;</button>
                 <span class="icon">${button.icon}</span>
@@ -169,41 +152,6 @@ class Dashboard {
                 e.preventDefault();
                 this.editButton(index);
             };
-
-            // Drag and Drop Logic for Buttons
-            buttonEl.addEventListener('dragstart', (e) => {
-                this.draggedButtonIndex = index;
-                (e.target as HTMLElement).classList.add('dragging');
-                if (e.dataTransfer) {
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', index.toString());
-                }
-            });
-
-            buttonEl.addEventListener('dragend', (e) => {
-                (e.target as HTMLElement).classList.remove('dragging');
-                this.draggedButtonIndex = null;
-            });
-
-            buttonEl.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-                return false;
-            });
-
-            buttonEl.addEventListener('drop', (e) => {
-                e.stopPropagation();
-                if (this.draggedButtonIndex !== null && this.draggedButtonIndex !== index) {
-                    // Swap logic
-                    const temp = this.buttons[this.draggedButtonIndex];
-                    this.buttons[this.draggedButtonIndex] = this.buttons[index];
-                    this.buttons[index] = temp;
-                    
-                    this.saveButtons();
-                    this.renderButtons();
-                }
-                return false;
-            });
 
             grid.appendChild(buttonEl);
         });
@@ -218,7 +166,6 @@ class Dashboard {
         this.widgets.forEach((widget, index) => {
             const widgetEl = document.createElement('div');
             widgetEl.className = 'widget-card';
-            widgetEl.draggable = true;
             widgetEl.innerHTML = `
                 <div class="widget-header">
                     <h3>${widget.name}</h3>
@@ -226,41 +173,6 @@ class Dashboard {
                 </div>
                 <div class="widget-content" id="widget-${index}"></div>
             `;
-
-            // Drag and Drop Logic for Widgets
-            widgetEl.addEventListener('dragstart', (e) => {
-                this.draggedWidgetIndex = index;
-                (e.target as HTMLElement).classList.add('dragging');
-                if (e.dataTransfer) {
-                    e.dataTransfer.effectAllowed = 'move';
-                    e.dataTransfer.setData('text/plain', index.toString());
-                }
-            });
-
-            widgetEl.addEventListener('dragend', (e) => {
-                (e.target as HTMLElement).classList.remove('dragging');
-                this.draggedWidgetIndex = null;
-            });
-
-            widgetEl.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-                return false;
-            });
-
-            widgetEl.addEventListener('drop', (e) => {
-                e.stopPropagation();
-                if (this.draggedWidgetIndex !== null && this.draggedWidgetIndex !== index) {
-                    // Swap logic
-                    const temp = this.widgets[this.draggedWidgetIndex];
-                    this.widgets[this.draggedWidgetIndex] = this.widgets[index];
-                    this.widgets[index] = temp;
-                    
-                    this.saveWidgets();
-                    this.renderWidgets();
-                }
-                return false;
-            });
 
             container.appendChild(widgetEl);
 
@@ -324,45 +236,6 @@ class Dashboard {
                 if (buttonSizeVal) buttonSizeVal.textContent = val + 'px';
                 this.renderButtons();
             };
-        }
-
-        this.updateFitButton();
-        this.setupBoardMode();
-    }
-
-    public toggleFit(): void {
-        this.settings.fitToScreen = !this.settings.fitToScreen;
-        this.updateFitButton();
-        this.renderButtons();
-        this.saveSettings();
-    }
-
-    private setupBoardMode(): void {
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && document.body.classList.contains('board-mode')) {
-                this.toggleBoardMode();
-            }
-        });
-    }
-
-    public toggleBoardMode(): void {
-        document.body.classList.toggle('board-mode');
-        const overlay = document.getElementById('boardModeOverlay');
-        if (overlay) {
-            overlay.style.display = document.body.classList.contains('board-mode') ? 'block' : 'none';
-        }
-        
-        // If entering board mode and fit to screen is off, maybe we should suggest it? 
-        // For now, let's just trigger a resize event to ensure layout updates
-        window.dispatchEvent(new Event('resize'));
-    }
-
-    private updateFitButton(): void {
-        const btn = document.getElementById('toggleFitBtn');
-        if (btn) {
-            btn.textContent = this.settings.fitToScreen ? 'Fit: On' : 'Fit: Off';
-            btn.style.background = this.settings.fitToScreen ? 'var(--accent-color)' : 'transparent';
-            btn.style.color = this.settings.fitToScreen ? 'white' : 'var(--text-main)';
         }
     }
 
@@ -450,6 +323,7 @@ class Dashboard {
         };
 
         if (button.type === 'keyboard') {
+            button.action = 'press';
             button.key = (document.getElementById('btnKey') as HTMLInputElement).value;
             button.shortcut = (document.getElementById('btnShortcut') as HTMLInputElement).value;
         } else {
@@ -656,9 +530,6 @@ class Dashboard {
         sys.style.display = type === 'system' ? 'block' : 'none';
     }
 };
-
-(window as any).toggleFit = () => (window as any).dashboardInstance.toggleFit();
-(window as any).toggleBoardMode = () => (window as any).dashboardInstance.toggleBoardMode();
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize WebSocket if available
